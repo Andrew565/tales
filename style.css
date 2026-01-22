@@ -1,0 +1,270 @@
+:root {
+    --bg-color: #0f0f11;
+    --surface-color: #1c1c1e;
+    --primary-color: #6366f1; /* Indigo */
+    --primary-hover: #4f46e5;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --border-color: #27272a;
+    --message-bg: #27272a;
+    --danger-color: #ef4444;
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+#app {
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-color);
+}
+
+/* Header */
+.app-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(15, 15, 17, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toggle-btn {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.toggle-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    color: var(--text-primary);
+    background: var(--surface-color);
+}
+
+/* Messages List */
+.messages-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+}
+
+.empty-state {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Message Item */
+.message {
+    background: var(--surface-color);
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin-bottom: 4px;
+    animation: fadeIn 0.3s ease-out;
+    position: relative;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+    flex: 1;
+}
+
+.message-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+/* Mobile: always show actions or use swipe (simplified to always visible for now on touch, or tap) */
+@media (hover: none) {
+    .message-actions {
+        opacity: 0.6;
+    }
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.action-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-primary);
+}
+
+.action-btn.delete:hover {
+    color: var(--danger-color);
+}
+
+/* Input Area */
+.input-area {
+    padding: 16px;
+    background: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.input-wrapper {
+    background: var(--surface-color);
+    border-radius: 24px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: flex-end; /* Align bottom for expanding textarea */
+    gap: 10px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--primary-color);
+}
+
+#message-input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    width: 100%;
+    resize: none;
+    max-height: 150px;
+    padding: 10px 0;
+    line-height: 1.5;
+    outline: none;
+}
+
+.send-btn {
+    background: var(--primary-color);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-bottom: 2px; /* slight adjust */
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+}
+
+.send-btn:not(:disabled):hover {
+    background: var(--primary-hover);
+}
+
+.send-btn:not(:disabled):active {
+    transform: scale(0.95);
+}

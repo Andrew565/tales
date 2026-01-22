@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TALES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1 class="logo">TALES</h1>
+            <div class="header-actions">
+                <button id="view-toggle" class="toggle-btn" aria-label="Toggle sent/unsent">
+                    <span id="toggle-label">Unsent</span>
+                </button>
+                <button id="email-btn" class="icon-btn" aria-label="Email unsent messages">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main id="messages-container" class="messages-list">
+            <!-- Messages will be injected here -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <p>No new notes.</p>
+            </div>
+        </main>
+
+        <footer class="input-area">
+            <div class="input-wrapper">
+                <textarea id="message-input" rows="1" placeholder="Type a note..."></textarea>
+                <button id="send-btn" class="send-btn" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
