@@ -1,0 +1,1 @@
+The "Tell Alice Later Efficiently System" allows users to write messages to themselves or someone else so that they can remember what they wanted to say to that person later. Recommend e-mailing yourself.
