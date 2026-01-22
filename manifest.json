@@ -1,0 +1,17 @@
+{
+  "name": "TALES Messaging",
+  "short_name": "TALES",
+  "description": "A minimalist messaging and note-taking app.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f0f11",
+  "theme_color": "#0f0f11",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
