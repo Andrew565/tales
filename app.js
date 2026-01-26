@@ -36,6 +36,10 @@ const emailBtn = document.getElementById('email-btn');
 const viewToggle = document.getElementById('view-toggle');
 const toggleLabel = document.getElementById('toggle-label');
 
+// --- Security Check ---
+const urlParams = new URLSearchParams(window.location.search);
+const isAuthorized = urlParams.get('pass') === 'iloveyou';
+
 let viewMode = 'unsent'; // 'unsent' or 'sent'
 let unsubscribe = null;
 
@@ -148,6 +152,7 @@ const createMessageElement = (data, id) => {
 
 // Send Message
 const sendMessage = async () => {
+    if (!isAuthorized) return;
     const text = messageInput.value.trim();
     if (!text) return;
 
@@ -176,6 +181,7 @@ const sendMessage = async () => {
 
 // Email Feature
 const emailUnsentMessages = async () => {
+    if (!isAuthorized) return;
     const messageElements = document.querySelectorAll('.message');
     const messages = [];
     const ids = [];
@@ -270,6 +276,14 @@ viewToggle.addEventListener('click', () => {
 const setupListener = () => {
     if (unsubscribe) unsubscribe();
 
+    if (!isAuthorized) {
+        messagesContainer.innerHTML = '';
+        messagesContainer.appendChild(emptyState);
+        emptyState.style.display = 'flex';
+        emptyState.querySelector('p').textContent = 'No messages found.';
+        return;
+    }
+
     if (db) {
         const q = query(
             collection(db, "messages"),
@@ -312,3 +326,11 @@ const setupListener = () => {
 };
 
 setupListener();
+
+// Hide UI elements if not authorized
+if (!isAuthorized) {
+    if (viewToggle) viewToggle.style.display = 'none';
+    if (emailBtn) emailBtn.style.display = 'none';
+    const inputArea = document.querySelector('.input-area');
+    if (inputArea) inputArea.style.display = 'none';
+}
