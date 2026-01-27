@@ -35,10 +35,12 @@ const emptyState = document.getElementById('empty-state');
 const emailBtn = document.getElementById('email-btn');
 const viewToggle = document.getElementById('view-toggle');
 const toggleLabel = document.getElementById('toggle-label');
+const passwordDialog = document.getElementById('password-dialog');
+const passwordForm = document.getElementById('password-form');
+const passwordEntryInput = document.getElementById('password-input');
 
 // --- Security Check ---
-const urlParams = new URLSearchParams(window.location.search);
-const isAuthorized = urlParams.get('pass') === 'iloveyou';
+let isAuthorized = localStorage.getItem('tales_authorized') === 'true';
 
 let viewMode = 'unsent'; // 'unsent' or 'sent'
 let unsubscribe = null;
@@ -272,6 +274,26 @@ viewToggle.addEventListener('click', () => {
     setupListener();
 });
 
+// Password Handling
+if (passwordForm && (passwordEntryInput instanceof HTMLInputElement) && (passwordDialog instanceof HTMLDialogElement)) {
+    passwordForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const password = passwordEntryInput.value;
+
+        if (password === 'iloveyou') {
+            isAuthorized = true;
+            localStorage.setItem('tales_authorized', 'true');
+            passwordDialog.close();
+            updateUIForAuth();
+            setupListener();
+        } else {
+            alert("Incorrect password.");
+            passwordEntryInput.value = '';
+            passwordEntryInput.focus();
+        }
+    });
+}
+
 // --- Firestore Listener ---
 const setupListener = () => {
     if (unsubscribe) unsubscribe();
@@ -325,12 +347,24 @@ const setupListener = () => {
     }
 };
 
-setupListener();
+const updateUIForAuth = () => {
+    if (isAuthorized) {
+        if (viewToggle) viewToggle.style.display = 'flex';
+        if (emailBtn && viewMode === 'unsent') emailBtn.style.display = 'flex';
+        const inputArea = document.querySelector('.input-area');
+        if (inputArea instanceof HTMLElement) inputArea.style.display = 'block';
+    } else {
+        if (viewToggle) viewToggle.style.display = 'none';
+        if (emailBtn) emailBtn.style.display = 'none';
+        const inputArea = document.querySelector('.input-area');
+        if (inputArea instanceof HTMLElement) inputArea.style.display = 'none';
 
-// Hide UI elements if not authorized
-if (!isAuthorized) {
-    if (viewToggle) viewToggle.style.display = 'none';
-    if (emailBtn) emailBtn.style.display = 'none';
-    const inputArea = document.querySelector('.input-area');
-    if (inputArea) inputArea.style.display = 'none';
-}
+        // Show dialog if not authorized
+        if (passwordDialog instanceof HTMLDialogElement) {
+            passwordDialog.showModal();
+        }
+    }
+};
+
+updateUIForAuth();
+setupListener();
