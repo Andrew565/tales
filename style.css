@@ -154,9 +154,12 @@ body {
 
 .message-actions {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 12px;
     opacity: 0;
     transition: opacity 0.2s;
+    justify-content: center;
+    align-self: stretch;
 }
 
 .message:hover .message-actions {
