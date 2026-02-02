@@ -32,7 +32,7 @@ const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
 const messagesContainer = document.getElementById('messages-container');
 const emptyState = document.getElementById('empty-state');
-const emailBtn = document.getElementById('email-btn');
+const unsentSummaryBtn = document.getElementById('unsent-summary-btn');
 const viewToggle = document.getElementById('view-toggle');
 const toggleLabel = document.getElementById('toggle-label');
 const passwordDialog = document.getElementById('password-dialog');
@@ -41,12 +41,18 @@ const passwordEntryInput = document.getElementById('password-input');
 const cancelEditBtn = document.getElementById('cancel-edit-btn');
 const sendBtnIcon = document.getElementById('send-btn-icon');
 
+const unsentDialog = document.getElementById('unsent-dialog');
+const unsentSummaryList = document.getElementById('unsent-summary-list');
+const copyBtn = document.getElementById('copy-btn');
+const closeUnsentBtn = document.getElementById('close-unsent-btn');
+
 // --- Security Check ---
 let isAuthorized = localStorage.getItem('tales_authorized') === 'true';
 
 let viewMode = 'unsent'; // 'unsent' or 'sent'
 let editingMessageId = null;
 let unsubscribe = null;
+let currentUnsentMessages = [];
 
 // --- Helper Functions ---
 
@@ -241,57 +247,90 @@ const sendMessage = async () => {
     }
 };
 
-// Email Feature
-const emailUnsentMessages = async () => {
+// Unsent Summary Feature
+const showUnsentSummary = () => {
     if (!isAuthorized) return;
-    const messageElements = document.querySelectorAll('.message');
-    const messages = [];
-    const ids = [];
 
-    messageElements.forEach(el => {
-        const text = el.querySelector('.message-text')?.textContent;
-        const id = el.dataset.id;
-        if (text && id) {
-            messages.push(text);
-            ids.push(id);
-        }
-    });
-
-    if (messages.length === 0) {
-        alert("No unsent messages to email.");
+    if (currentUnsentMessages.length === 0) {
+        alert("No unsent messages to show.");
         return;
     }
 
-    const subject = encodeURIComponent(`My Notes to Self - ${new Date().toLocaleDateString()}`);
-    const body = encodeURIComponent(messages.map(m => `• ${m}`).join('\n\n'));
-    const email = `mailto:?subject=${subject}&body=${body}`;
+    if (unsentSummaryList) {
+        unsentSummaryList.innerHTML = '';
+        currentUnsentMessages.forEach(msg => {
+            const item = document.createElement('div');
+            item.classList.add('summary-item');
 
-    // Open email client immediately
-    window.open(email, '_blank');
+            const text = document.createElement('div');
+            text.classList.add('message-text');
+            text.textContent = msg.content;
 
-    // Mark as sent in DB
-    if (db && ids.length > 0) {
-        try {
+            const time = document.createElement('div');
+            time.classList.add('message-time');
+            let timeStr = 'Just now';
+            if (msg.timestamp) {
+                const date = msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp);
+                timeStr = date.toLocaleString([], {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+            time.textContent = timeStr;
+
+            item.appendChild(text);
+            item.appendChild(time);
+            unsentSummaryList.appendChild(item);
+        });
+    }
+
+    if (unsentDialog instanceof HTMLDialogElement) {
+        unsentDialog.showModal();
+    }
+};
+
+const copyUnsentToClipboard = async () => {
+    if (currentUnsentMessages.length === 0) return;
+
+    const textToCopy = currentUnsentMessages.map(msg => {
+        let timeStr = 'Just now';
+        if (msg.timestamp) {
+            const date = msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp);
+            timeStr = date.toLocaleString([], {
+                hour: 'numeric',
+                minute: '2-digit',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        return `[${timeStr}]\n${msg.content}`;
+    }).join('\n\n');
+
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+
+        // Mark as sent in DB
+        if (db) {
             const batch = writeBatch(db);
-            ids.forEach(id => {
-                const msgRef = doc(db, "messages", id);
+            currentUnsentMessages.forEach(msg => {
+                const msgRef = doc(db, "messages", msg.id);
                 batch.update(msgRef, {
                     status: "sent"
                 });
             });
             await batch.commit();
-            console.log(`Marked ${ids.length} messages as sent.`);
-        } catch (e) {
-            console.error("Error marking messages as sent:", e);
-            // Non-blocking error for the user as the email was already opened
+            console.log(`Marked ${currentUnsentMessages.length} messages as sent.`);
         }
-    } else if (!db) {
-        // Mock mode: just clear the UI
-        messageElements.forEach(el => el.remove());
-        if (document.querySelectorAll('.message').length === 0) {
-            messagesContainer.appendChild(emptyState);
-            emptyState.style.display = 'flex';
+
+        if (unsentDialog instanceof HTMLDialogElement) {
+            unsentDialog.close();
         }
+
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy to clipboard.');
     }
 };
 
@@ -318,8 +357,14 @@ messageInput.addEventListener('keydown', (e) => {
     }
 });
 
-// Email Button
-emailBtn.addEventListener('click', emailUnsentMessages);
+// Summary Button
+unsentSummaryBtn.addEventListener('click', showUnsentSummary);
+
+// Dialog Buttons
+if (copyBtn) copyBtn.addEventListener('click', copyUnsentToClipboard);
+if (closeUnsentBtn) closeUnsentBtn.addEventListener('click', () => {
+    if (unsentDialog instanceof HTMLDialogElement) unsentDialog.close();
+});
 
 // Cancel Edit Button
 cancelEditBtn.addEventListener('click', cancelEditing);
@@ -331,7 +376,7 @@ viewToggle.addEventListener('click', () => {
     // Update UI
     toggleLabel.textContent = viewMode.charAt(0).toUpperCase() + viewMode.slice(1);
     viewToggle.classList.toggle('active', viewMode === 'sent');
-    emailBtn.style.display = viewMode === 'unsent' ? 'flex' : 'none';
+    unsentSummaryBtn.style.display = viewMode === 'unsent' ? 'flex' : 'none';
 
     // Refresh listener
     setupListener();
@@ -385,18 +430,23 @@ const setupListener = () => {
                 emptyState.querySelector('p').textContent = viewMode === 'unsent' ? 'No new notes.' : 'No sent notes.';
             } else {
                 emptyState.style.display = 'none';
+                const newUnsentMessages = [];
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     const el = createMessageElement(data, doc.id);
 
-                    // Hide check button if already sent
-                    if (viewMode === 'sent') {
-                        const checkBtn = el.querySelector('.action-btn:not(.delete)');
-                        if (checkBtn) checkBtn.style.display = 'none';
+                    if (viewMode === 'unsent') {
+                        newUnsentMessages.push({
+                            id: doc.id,
+                            ...data
+                        });
                     }
 
                     messagesContainer.appendChild(el);
                 });
+                if (viewMode === 'unsent') {
+                    currentUnsentMessages = newUnsentMessages;
+                }
                 scrollToBottom();
             }
         }, (error) => {
@@ -413,12 +463,12 @@ const setupListener = () => {
 const updateUIForAuth = () => {
     if (isAuthorized) {
         if (viewToggle) viewToggle.style.display = 'flex';
-        if (emailBtn && viewMode === 'unsent') emailBtn.style.display = 'flex';
+        if (unsentSummaryBtn && viewMode === 'unsent') unsentSummaryBtn.style.display = 'flex';
         const inputArea = document.querySelector('.input-area');
         if (inputArea instanceof HTMLElement) inputArea.style.display = 'block';
     } else {
         if (viewToggle) viewToggle.style.display = 'none';
-        if (emailBtn) emailBtn.style.display = 'none';
+        if (unsentSummaryBtn) unsentSummaryBtn.style.display = 'none';
         const inputArea = document.querySelector('.input-area');
         if (inputArea instanceof HTMLElement) inputArea.style.display = 'none';
 
