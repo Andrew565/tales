@@ -139,6 +139,7 @@ const createMessageElement = (data, id) => {
     const div = document.createElement('div');
     div.classList.add('message');
     div.dataset.id = id;
+    div.dataset.status = data.status;
 
     const contentWrapper = document.createElement('div');
     contentWrapper.classList.add('message-content');

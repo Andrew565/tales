@@ -1,12 +1,14 @@
 :root {
     --bg-color: #0f0f11;
     --surface-color: #1c1c1e;
-    --primary-color: #6366f1; /* Indigo */
-    --primary-hover: #4f46e5;
+    --primary-color: #fb7185; /* Light Red/Rose */
+    --primary-hover: #f43f5e;
+    --accent-teal: #2dd4bf;   /* Teal Blue */
+    --accent-teal-hover: #14b8a6;
     --text-primary: #ffffff;
     --text-secondary: #a1a1aa;
     --border-color: #27272a;
-    --danger-color: #ef4444;
+    --danger-color: var(--primary-color);
     --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -15,6 +17,29 @@
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+    background: rgba(251, 113, 133, 0.3);
+    color: var(--text-primary);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
 }
 
 body {
@@ -52,8 +77,13 @@ body {
 
 .logo {
     font-size: 1.25rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-teal));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
 }
 
 .header-actions {
@@ -80,9 +110,18 @@ body {
 }
 
 .toggle-btn.active {
-    background: var(--primary-color);
+    background: var(--accent-teal);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--accent-teal);
+}
+
+.icon-btn.accent {
+    color: var(--accent-teal);
+}
+
+.icon-btn.accent:hover {
+    color: var(--accent-teal-hover);
+    background: rgba(45, 212, 191, 0.1);
 }
 
 .icon-btn {
@@ -131,11 +170,21 @@ body {
     margin-bottom: 4px;
     animation: fadeIn 0.3s ease-out;
     position: relative;
+    border-left: 4px solid transparent;
+    transition: border-color 0.3s, transform 0.2s;
 
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
+}
+
+.message[data-status="unsent"] {
+    border-left-color: var(--primary-color);
+}
+
+.message:hover {
+    transform: translateX(4px);
 }
 
 @keyframes fadeIn {
@@ -236,6 +285,7 @@ body {
 
 .input-wrapper:focus-within {
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(251, 113, 133, 0.1);
 }
 
 #message-input {
@@ -277,6 +327,7 @@ body {
 
 .send-btn:not(:disabled):hover {
     background: var(--primary-hover);
+    box-shadow: 0 0 15px rgba(251, 113, 133, 0.4);
 }
 
 .send-btn:not(:disabled):active {
@@ -345,7 +396,7 @@ body {
 }
 
 .submit-btn {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-teal));
     color: white;
     border: none;
     border-radius: 12px;
@@ -353,11 +404,14 @@ body {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .submit-btn:hover {
-    background: var(--primary-hover);
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 .submit-btn:active {
