@@ -82,6 +82,24 @@ const markAsSent = async (id) => {
     }
 };
 
+// Action: Unsend
+const unsendMessage = async (id) => {
+    if (!db) {
+        document.querySelector(`.message[data-id="${id}"]`)?.remove();
+        return;
+    }
+
+    try {
+        const msgRef = doc(db, "messages", id);
+        await updateDoc(msgRef, {
+            status: "unsent"
+        });
+    } catch (e) {
+        console.error("Error unsending:", e);
+        alert("Action Failed: " + e.message);
+    }
+};
+
 // Action: Delete
 const deleteMessage = async (id) => {
     if (!db) {
@@ -182,6 +200,13 @@ const createMessageElement = (data, id) => {
         checkBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
         checkBtn.onclick = () => markAsSent(id);
         actions.appendChild(checkBtn);
+    } else if (data.status === 'sent') {
+        const unsendBtn = document.createElement('button');
+        unsendBtn.classList.add('action-btn');
+        unsendBtn.title = "Unsend";
+        unsendBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>`;
+        unsendBtn.onclick = () => unsendMessage(id);
+        actions.appendChild(unsendBtn);
     }
 
     // Edit Button (Pencil)
